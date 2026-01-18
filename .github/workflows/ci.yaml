@@ -24,15 +24,6 @@ jobs:
         pip install -r requirements.txt
         pip install dvc mlflow
         pip install dagshub
-
-    - name: Pull data & models
-      run: dvc pull
-
-    - name: Run training pipeline
-      env:
-        MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
-      run: |
+        
+    - run: |
         python src/pipeline/train_pipeline.py
-
-    - name: Push updated artifacts
-      run: dvc push
