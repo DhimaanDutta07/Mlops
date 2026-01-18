@@ -1,0 +1,38 @@
+name: ML CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install dvc mlflow
+        pip install dagshub
+
+    - name: Pull data & models
+      run: dvc pull
+
+    - name: Run training pipeline
+      env:
+        MLFLOW_TRACKING_URI: ${{ secrets.MLFLOW_TRACKING_URI }}
+      run: |
+        python src/pipeline/train_pipeline.py
+
+    - name: Push updated artifacts
+      run: dvc push
